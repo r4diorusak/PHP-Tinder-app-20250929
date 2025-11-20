@@ -1,0 +1,12 @@
+{
+  "name": "tinder-rn-skeleton",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.71.8",
+    "@tanstack/react-query": "^4.0.0",
+    "recoil": "^0.7.0",
+    "react-native-deck-swiper": "^2.0.5"
+  }
+}
