@@ -1,14 +1,14 @@
-version: '3.7'
 services:
-  swagger:
+  swagger-ui:
     image: swaggerapi/swagger-ui
+    container_name: swagger-ui
     ports:
-      - "8080:8080"
+      - "8081:8080"
     volumes:
-      - ./backend/openapi.yaml:/usr/share/nginx/html/openapi.yaml:ro
+      - ./backend/openapi.yaml:/openapi.yaml:ro
     environment:
-      - SWAGGER_JSON=/usr/share/nginx/html/openapi.yaml
-
+      SWAGGER_JSON: /openapi.yaml
+    restart: unless-stopped
   db:
     image: mysql:8.0
     environment:

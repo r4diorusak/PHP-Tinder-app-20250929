@@ -7,7 +7,7 @@ ARG LARAVEL_VERSION=10.*
 RUN composer create-project --prefer-dist laravel/laravel="${LARAVEL_VERSION}" app
 
 # Runtime stage
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 # System deps
 RUN apt-get update && apt-get install -y \
@@ -32,12 +32,12 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && composer install --no-interaction --optimize-autoloader || true
 
 # Copy Laravel snippets (models, migrations, seeders, controllers, routes) into the app
-COPY ../laravel-snippets/app/Models /var/www/html/app/Models
-COPY ../laravel-snippets/app/Http/Controllers /var/www/html/app/Http/Controllers
-COPY ../laravel-snippets/app/Console /var/www/html/app/Console
-COPY ../laravel-snippets/database/migrations /var/www/html/database/migrations
-COPY ../laravel-snippets/database/seeders /var/www/html/database/seeders
-COPY ../laravel-snippets/routes-api-sample.php /var/www/html/routes/api.php
+COPY laravel-snippets/app/Models /var/www/html/app/Models
+COPY laravel-snippets/app/Http/Controllers /var/www/html/app/Http/Controllers
+COPY laravel-snippets/app/Console /var/www/html/app/Console
+    COPY ../laravel-snippets/migrations /var/www/html/database/migrations
+COPY laravel-snippets/database/seeders /var/www/html/database/seeders
+COPY laravel-snippets/routes-api-sample.php /var/www/html/routes/api.php
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
