@@ -1,0 +1,831 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "PHP Tinder app 20250929",
+        "description": "Dating application API with swipe cards, likes/dislikes, and match functionality. Developed by Khairul Adha",
+        "contact": {
+            "name": "Khairul Adha",
+            "email": "r4dioz.88@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Development Server"
+        },
+        {
+            "url": "http://localhost",
+            "description": "XAMPP Server"
+        }
+    ],
+    "paths": {
+        "/api/people": {
+            "get": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get recommended people",
+                "description": "Get paginated list of recommended people excluding already liked/disliked ones",
+                "operationId": "getPeople",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Current user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Sarah Johnson"
+                                                    },
+                                                    "age": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "pictures": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "https://i.pravatar.cc/300?img=1"
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "New York, USA"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Love hiking, coffee, and adventure!"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "male",
+                                                            "female",
+                                                            "other"
+                                                        ],
+                                                        "example": "female"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 29
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "has_more": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/people/{id}/like": {
+            "post": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Like a person",
+                "description": "Like a person and detect if it's a match (mutual like)",
+                "operationId": "likePerson",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Person ID to like",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "Current user ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully liked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Person liked successfully!"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "match": {
+                                                    "description": "True if both users liked each other",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "person_name": {
+                                                    "type": "string",
+                                                    "example": "Sarah Johnson"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Person not found"
+                    },
+                    "400": {
+                        "description": "Already liked this person"
+                    }
+                }
+            }
+        },
+        "/api/people/{id}/dislike": {
+            "post": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Dislike a person",
+                "description": "Pass/reject a person",
+                "operationId": "dislikePerson",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Person ID to dislike",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully disliked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Person disliked successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Person not found"
+                    },
+                    "400": {
+                        "description": "Already disliked this person"
+                    }
+                }
+            }
+        },
+        "/api/people/liked": {
+            "get": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get liked people list",
+                "description": "Get paginated list of people that the current user has liked",
+                "operationId": "getLikedPeople",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Current user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of results per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Sarah Johnson"
+                                                    },
+                                                    "age": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "pictures": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "https://i.pravatar.cc/300?img=1"
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "New York, USA"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Love hiking, coffee, and adventure!"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "male",
+                                                            "female",
+                                                            "other"
+                                                        ],
+                                                        "example": "female"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "has_more": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/people/disliked": {
+            "get": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get disliked people list",
+                "description": "Get list of people that the user has disliked/passed on",
+                "operationId": "getDislikedList",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Current user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Jane Smith"
+                                                    },
+                                                    "age": {
+                                                        "type": "integer",
+                                                        "example": 25
+                                                    },
+                                                    "pictures": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "https://i.pravatar.cc/300?img=2"
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "New York, USA"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Coffee addict and book lover"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "male",
+                                                            "female",
+                                                            "other"
+                                                        ],
+                                                        "example": "female"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "has_more": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/people/matches": {
+            "get": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get matches list",
+                "description": "Get list of mutual likes (matches) - people who liked each other",
+                "operationId": "getMatches",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Current user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Emily Davis"
+                                                    },
+                                                    "age": {
+                                                        "type": "integer",
+                                                        "example": 26
+                                                    },
+                                                    "pictures": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "https://i.pravatar.cc/300?img=3"
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "Los Angeles, USA"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Beach lover and yoga enthusiast"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "male",
+                                                            "female",
+                                                            "other"
+                                                        ],
+                                                        "example": "female"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "count": {
+                                            "description": "Total number of matches",
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/people/liked-opponents": {
+            "get": {
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get liked opponents list",
+                "description": "Get list of people who have liked the current user (opponents who liked you)",
+                "operationId": "getLikedOpponents",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "Current user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Michael Brown"
+                                                    },
+                                                    "age": {
+                                                        "type": "integer",
+                                                        "example": 28
+                                                    },
+                                                    "pictures": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "https://i.pravatar.cc/300?img=5"
+                                                        }
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "Chicago, USA"
+                                                    },
+                                                    "bio": {
+                                                        "type": "string",
+                                                        "example": "Sports enthusiast and travel lover"
+                                                    },
+                                                    "gender": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "male",
+                                                            "female",
+                                                            "other"
+                                                        ],
+                                                        "example": "male"
+                                                    },
+                                                    "is_match": {
+                                                        "description": "True if you also liked them back",
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "count": {
+                                            "description": "Total number of people who liked you",
+                                            "type": "integer",
+                                            "example": 8
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/people/check-popular": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Check and notify popular people",
+                "description": "Manually trigger checking for people with 50+ likes and send email notification to admin",
+                "operationId": "checkPopularPeople",
+                "responses": {
+                    "200": {
+                        "description": "Successfully checked and sent notifications",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Found 2 popular people and sent notifications"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "people": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 81
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Test Popular Person"
+                                                            },
+                                                            "likes_count": {
+                                                                "type": "integer",
+                                                                "example": 51
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "admin_email": {
+                                                    "type": "string",
+                                                    "example": "admin@example.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "People",
+            "description": "People"
+        },
+        {
+            "name": "Admin",
+            "description": "Admin"
+        }
+    ]
+}

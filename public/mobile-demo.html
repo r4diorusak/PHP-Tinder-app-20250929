@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP Tinder app 20250929 - Mobile Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(254, 80, 102, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.45);
+        }
+        
+        .header-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FE5066;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .card-container {
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            position: relative;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        .card:active {
+            cursor: grabbing;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card.swiping {
+            transition: none;
+        }
+        
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 80px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .swipe-like {
+            left: 30px;
+            color: #4ECDC4;
+        }
+        
+        .swipe-nope {
+            right: 30px;
+            color: #FF6B6B;
+        }
+        
+        .swipe-indicator.show {
+            opacity: 1;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+        }
+        
+        .card-info {
+            padding: 16px;
+            position: relative;
+        }
+        
+        .card-refresh-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .card-refresh-btn img {
+            width: 28px;
+            height: 28px;
+            filter: grayscale(100%) opacity(0.6);
+            transition: all 0.3s ease;
+        }
+        
+        .card-refresh-btn:hover {
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            border-color: #FE5066;
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 4px 15px rgba(254, 80, 102, 0.3);
+        }
+        
+        .card-refresh-btn:hover img {
+            filter: brightness(0) invert(1);
+        }
+        
+        .card-refresh-btn:active {
+            transform: rotate(180deg) scale(0.95);
+        }
+        
+        .card-refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+        
+        .card-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            padding-right: 50px;
+        }
+        
+        .card-location {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-location::before {
+            content: "📍";
+            margin-right: 5px;
+        }
+        
+        .card-bio {
+            font-size: 15px;
+            color: #888;
+            font-style: italic;
+            line-height: 1.5;
+        }
+        
+        .card-actions {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            gap: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-dislike {
+            background: linear-gradient(135deg, #FF6B6B, #FF5252);
+            color: white;
+        }
+        
+        .btn-dislike:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-like {
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+        }
+        
+        .btn-like:hover {
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(to top, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 12px 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 10px;
+            border: none;
+            background: none;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            border-radius: 0 0 3px 3px;
+        }
+        
+        .nav-icon {
+            font-size: 26px;
+            margin-bottom: 4px;
+            filter: grayscale(100%);
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-icon {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.15);
+        }
+        
+        .nav-item:hover .nav-icon {
+            filter: grayscale(0%);
+            opacity: 0.8;
+        }
+        
+        .nav-label {
+            font-size: 10px;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active .nav-label {
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+        
+        .container {
+            padding-bottom: 85px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px 20px;
+            color: #FF6B6B;
+        }
+        
+        .error-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .error-text {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-retry {
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(254, 80, 102, 0.3);
+        }
+        
+        .btn-retry:hover {
+            box-shadow: 0 6px 20px rgba(254, 80, 102, 0.4);
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-text {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        
+        .match-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+            min-width: 300px;
+        }
+        
+        .match-notification.show {
+            transform: translate(-50%, -50%) scale(1);
+            animation: bounce 0.6s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+        
+        .match-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .match-text {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .match-message {
+            font-size: 16px;
+            margin-bottom: 25px;
+            opacity: 0.95;
+        }
+        
+        .match-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .match-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .match-btn span {
+            font-size: 18px;
+        }
+        
+        .match-btn-primary {
+            background: white;
+            color: #FE5066;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .match-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        
+        .match-btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .match-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FE5066;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #9C27B0, #E91E63);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            max-height: calc(80vh - 80px);
+            overflow-y: auto;
+        }
+        
+        .opponent-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .opponent-card:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+        
+        .opponent-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 3px solid #9C27B0;
+        }
+        
+        .opponent-info {
+            flex: 1;
+        }
+        
+        .opponent-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .opponent-details {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .match-badge {
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .match-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .match-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .match-action-btn.profile {
+            color: #666;
+        }
+        
+        .match-action-btn.profile:hover {
+            background: #f5f5f5;
+            border-color: #999;
+        }
+        
+        .match-action-btn.message {
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+            border-color: #4ECDC4;
+        }
+        
+        .match-action-btn.message:hover {
+            background: linear-gradient(135deg, #44A7A0, #3d918b);
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+        }
+        
+        .no-opponents {
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+        
+        .no-opponents-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .profile-detail {
+            text-align: center;
+        }
+        
+        .profile-image-large {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-header {
+            margin-bottom: 20px;
+        }
+        
+        .profile-name-large {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .profile-location-large {
+            font-size: 18px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .profile-bio-large {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .profile-bio-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .profile-bio-text {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .profile-action-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .profile-action-btn.message {
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+        }
+        
+        .profile-action-btn.message:hover {
+            background: linear-gradient(135deg, #44A7A0, #3d918b);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+        
+        .chat-body {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: calc(80vh - 80px);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-message.sent {
+            align-items: flex-end;
+        }
+        
+        .chat-message.received {
+            align-items: flex-start;
+        }
+        
+        .message-text {
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .chat-message.sent .message-text {
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+        }
+        
+        .chat-message.received .message-text {
+            background: white;
+            color: #333;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+        }
+        
+        .chat-input:focus {
+            border-color: #4ECDC4;
+        }
+        
+        .chat-send-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4ECDC4, #44A7A0);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-send-btn:hover {
+            background: linear-gradient(135deg, #44A7A0, #3d918b);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .pull-refresh-indicator {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-80px);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+            z-index: 100;
+        }
+        
+        .pull-refresh-indicator.visible {
+            transform: translateX(-50%) translateY(20px);
+        }
+        
+        .pull-refresh-icon {
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+        
+        .pull-refresh-indicator.spinning .pull-refresh-icon {
+            animation: spin 1s linear infinite;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 10px;
+        }
+        
+        .pagination-btn {
+            padding: 10px 20px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: #333;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FE5066, #FF6B95);
+            color: white;
+            border-color: #FE5066;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #666;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="pull-refresh-indicator" id="pullRefreshIndicator">
+            <div class="pull-refresh-icon">🔄</div>
+        </div>
+        
+        <div class="header">
+          
+            <div class="header-title">🔥 PHP Tinder</div>
+           
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat">
+                <div class="stat-value" id="totalPeople">0</div>
+                <div class="stat-label">People</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalLikes">0</div>
+                <div class="stat-label">Likes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalDislikes">0</div>
+                <div class="stat-label">Passes</div>
+            </div>
+        </div>
+        
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>Loading people...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="match-notification" id="matchNotification">
+        <div class="match-icon">💖</div>
+        <div class="match-text">🎉 It's a Match! 🎉</div>
+        <div class="match-message">Congratulations! You matched with this person!</div>
+        <div class="match-buttons">
+            <button class="match-btn match-btn-secondary" onclick="viewMatchProfile()">
+                <span>👤</span> View Profile
+            </button>
+            <button class="match-btn match-btn-primary" onclick="keepSwiping()">
+                <span>🔥</span> Keep Swiping
+            </button>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <div class="bottom-nav">
+        <button class="nav-item active" id="navDiscover" onclick="switchTab('discover')">
+            <div class="nav-icon">🔥</div>
+            <div class="nav-label">Recommended</div>
+        </button>
+        <button class="nav-item" id="navLiked" onclick="switchTab('liked')">
+            <div class="nav-icon">💖</div>
+            <div class="nav-label">Liked Opponents</div>
+        </button>
+        <button class="nav-item" id="navMatches" onclick="switchTab('matches')">
+            <div class="nav-icon">❌</div>
+            <div class="nav-label">Disliked</div>
+        </button>
+        <button class="nav-item" id="navMatch" onclick="switchTab('match')">
+            <div class="nav-icon">✨</div>
+            <div class="nav-label">Match</div>
+        </button>
+        <button class="nav-item" id="navProfile" onclick="switchTab('profile')">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">Profile</div>
+        </button>
+    </div>
+    
+    <div class="modal-overlay" id="likedOpponentsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">💖 Liked Opponents</div>
+                <button class="modal-close" onclick="closeLikedOpponents()">×</button>
+            </div>
+            <div class="modal-body" id="opponentsContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">👤 Profile</div>
+                <button class="modal-close" onclick="closeProfile()">×</button>
+            </div>
+            <div class="modal-body" id="profileContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading profile...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="chatModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="chatPersonName">💬 Chat</div>
+                <button class="modal-close" onclick="closeChat()">×</button>
+            </div>
+            <div class="modal-body chat-body" id="chatContent">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message received">
+                        <div class="message-text">Hey! 👋</div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">
+                        <span>📤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        const USER_ID = 1;
+        
+        let people = [];
+        let currentIndex = 0;
+        let stats = { likes: 0, dislikes: 0 };
+        
+        // Fetch people from API
+        async function fetchPeople() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/people?user_id=${USER_ID}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    people = data.data;
+                    document.getElementById('totalPeople').textContent = people.length;
+                    renderCards();
+                } else {
+                    showError('Failed to load people');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Unable to connect to API: ${error.message}`);
+            }
+        }
+        
+        // Render cards
+        function renderCards() {
+            const content = document.getElementById('content');
+            
+            if (people.length === 0) {
+                content.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">🎉</div>
+                        <div class="empty-text">No more people to show!</div>
+                        <button class="btn-retry" onclick="location.reload()">Reload</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            content.innerHTML = '';
+            
+            people.forEach((person, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.display = index === currentIndex ? 'block' : 'none';
+                card.id = `card-${person.id}`;
+                
+                card.innerHTML = `
+                    <div class="swipe-like swipe-indicator" id="like-indicator-${person.id}">LIKE</div>
+                    <div class="swipe-nope swipe-indicator" id="nope-indicator-${person.id}">NOPE</div>
+                    <img src="${person.pictures[0]}" alt="${person.name}" class="card-image" onerror="this.src='https://via.placeholder.com/400x500?text=${person.name}'">
+                    <div class="card-info">
+                        <button class="card-refresh-btn" onclick="refreshPeople()" title="Refresh">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2'/%3E%3C/svg%3E" alt="Refresh">
+                        </button>
+                        <div class="card-name">${person.name}, ${person.age}</div>
+                        <div class="card-location">${person.location}</div>
+                        ${person.bio ? `<div class="card-bio">${person.bio}</div>` : ''}
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn btn-dislike" onclick="handleDislike(${person.id})">
+                            ✕ Nope
+                        </button>
+                        <button class="btn btn-like" onclick="handleLike(${person.id})">
+                            ♥ Like
+                        </button>
+                    </div>
+                `;
+                
+                content.appendChild(card);
+                
+                // Add swipe functionality
+                addSwipeListeners(card, person.id);
+            });
+        }
+        
+        // Swipe functionality
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let isProcessing = false; // Prevent double execution
+        
+        function addSwipeListeners(card, personId) {
+            const likeIndicator = document.getElementById(`like-indicator-${personId}`);
+            const nopeIndicator = document.getElementById(`nope-indicator-${personId}`);
+            
+            // Touch events for mobile
+            card.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+                card.classList.add('swiping');
+            });
+            
+            card.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                
+                currentX = e.touches[0].clientX;
+                const diff = currentX - startX;
+                
+                // Move card
+                card.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+                
+                // Show indicators
+                if (diff > 50) {
+                    likeIndicator.classList.add('show');
+                    nopeIndicator.classList.remove('show');
+                } else if (diff < -50) {
+                    nopeIndicator.classList.add('show');
+                    likeIndicator.classList.remove('show');
+                } else {
+                    likeIndicator.classList.remove('show');
+                    nopeIndicator.classList.remove('show');
+                }
+            });
+            
+            card.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                
+                const diff = currentX - startX;
+                
+                if (diff > 100) {
+                    // Swipe right - Like
+                    card.style.transform = `translateX(1000px) rotate(30deg)`;
+                    setTimeout(() => handleLike(personId), 300);
+                } else if (diff < -100) {
+                    // Swipe left - Nope
+                    card.style.transform = `translateX(-1000px) rotate(-30deg)`;
+                    setTimeout(() => handleDislike(personId), 300);
+                } else {
+                    // Return to center
+                    card.style.transform = '';
+                }
+                
+                isDragging = false;
+                card.classList.remove('swiping');
+                likeIndicator.classList.remove('show');
+                nopeIndicator.classList.remove('show');
+            });
+            
+            // Mouse events for desktop
+            card.addEventListener('mousedown', (e) => {
+                // Prevent drag on buttons and refresh button
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    return;
+                }
+                
+                e.preventDefault(); // Prevent default drag behavior
+                startX = e.clientX;
+                isDragging = true;
+                card.classList.add('swiping');
+                card.style.cursor = 'grabbing';
+            });
+            
+            card.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                currentX = e.clientX;
+                const diff = currentX - startX;
+                
+                card.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+                
+                if (diff > 50) {
+                    likeIndicator.classList.add('show');
+                    nopeIndicator.classList.remove('show');
+                } else if (diff < -50) {
+                    nopeIndicator.classList.add('show');
+                    likeIndicator.classList.remove('show');
+                } else {
+                    likeIndicator.classList.remove('show');
+                    nopeIndicator.classList.remove('show');
+                }
+            });
+            
+            card.addEventListener('mouseup', (e) => {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                const diff = currentX - startX;
+                
+                if (diff > 100) {
+                    card.style.transform = `translateX(1000px) rotate(30deg)`;
+                    setTimeout(() => handleLike(personId), 300);
+                } else if (diff < -100) {
+                    card.style.transform = `translateX(-1000px) rotate(-30deg)`;
+                    setTimeout(() => handleDislike(personId), 300);
+                } else {
+                    card.style.transform = '';
+                }
+                
+                isDragging = false;
+                card.classList.remove('swiping');
+                card.style.cursor = 'grab';
+                likeIndicator.classList.remove('show');
+                nopeIndicator.classList.remove('show');
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                if (isDragging) {
+                    card.style.transform = '';
+                    isDragging = false;
+                    card.classList.remove('swiping');
+                    card.style.cursor = 'grab';
+                    likeIndicator.classList.remove('show');
+                    nopeIndicator.classList.remove('show');
+                }
+            });
+            
+            // Prevent image drag
+            const cardImage = card.querySelector('.card-image');
+            if (cardImage) {
+                cardImage.addEventListener('dragstart', (e) => {
+                    e.preventDefault();
+                });
+            }
+        }
+        
+        // Handle like
+        async function handleLike(personId) {
+            if (isProcessing) return; // Prevent double execution
+            isProcessing = true;
+            
+            try {
+                // Random match: 30% chance of getting a match
+                const isRandomMatch = Math.random() < 0.3;
+                
+                const response = await fetch(`${API_BASE_URL}/people/${personId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        user_id: USER_ID,
+                        simulate_match: isRandomMatch  // Send random match flag to backend
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    stats.likes++;
+                    document.getElementById('totalLikes').textContent = stats.likes;
+                    
+                    if (data.is_match) {
+                        showMatchNotification();
+                        // Don't call nextCard() here, let user click button first
+                    } else {
+                        showToast('💚 Liked!');
+                        nextCard();
+                    }
+                }
+            } catch (error) {
+                console.error('Error liking person:', error);
+            } finally {
+                setTimeout(() => { isProcessing = false; }, 500);
+            }
+        }
+        
+        // Handle dislike
+        async function handleDislike(personId) {
+            if (isProcessing) return; // Prevent double execution
+            isProcessing = true;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/people/${personId}/dislike`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: USER_ID })
+                });
+                
+                if (response.ok) {
+                    stats.dislikes++;
+                    document.getElementById('totalDislikes').textContent = stats.dislikes;
+                    showToast('👋 Passed');
+                    nextCard();
+                }
+            } catch (error) {
+                console.error('Error disliking person:', error);
+            } finally {
+                setTimeout(() => { isProcessing = false; }, 500);
+            }
+        }
+        
+        // Show next card
+        function nextCard() {
+            const currentCard = document.getElementById(`card-${people[currentIndex].id}`);
+            currentCard.style.display = 'none';
+            
+            currentIndex++;
+            
+            if (currentIndex < people.length) {
+                const nextCard = document.getElementById(`card-${people[currentIndex].id}`);
+                nextCard.style.display = 'block';
+            } else {
+                const content = document.getElementById('content');
+                content.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">🎉</div>
+                        <div class="empty-text">You've seen everyone!</div>
+                        <button class="btn-retry" onclick="location.reload()">Load More</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Show match notification
+        function showMatchNotification() {
+            const notification = document.getElementById('matchNotification');
+            notification.classList.add('show');
+            // Don't auto-hide, let user click button to close
+        }
+        
+        // View match profile function
+        function viewMatchProfile() {
+            const notification = document.getElementById('matchNotification');
+            notification.classList.remove('show');
+            // Move to next card first
+            nextCard();
+            // Then open matches tab to see the match
+            switchTab('match');
+        }
+        
+        // Keep swiping function
+        function keepSwiping() {
+            const notification = document.getElementById('matchNotification');
+            notification.classList.remove('show');
+            // Move to next card
+            nextCard();
+        }
+        
+        // Show error
+        function showError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="error">
+                    <div class="error-icon">❌</div>
+                    <div class="error-text">${message}</div>
+                    <button class="btn-retry" onclick="location.reload()">Retry</button>
+                </div>
+            `;
+        }
+        
+        // Show discover list with pagination
+        let currentDiscoverPage = 1;
+        async function showDiscoverList(page = 1) {
+            const modal = document.getElementById('likedOpponentsModal');
+            const content = document.getElementById('opponentsContent');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            currentDiscoverPage = page;
+            modalTitle.textContent = '🔥 Recommended People';
+            modal.classList.add('show');
+            
+            // Reset content
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading people...</div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/people?user_id=${USER_ID}&per_page=10&page=${page}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const peopleList = data.data.map(person => `
+                        <div class="opponent-card">
+                            <img src="${person.pictures[0]}" 
+                                 alt="${person.name}" 
+                                 class="opponent-avatar" 
+                                 onerror="this.src='https://via.placeholder.com/70?text=${person.name.charAt(0)}'">
+                            <div class="opponent-info">
+                                <div class="opponent-name">${person.name}, ${person.age}</div>
+                                <div class="opponent-details">📍 ${person.location}</div>
+                                ${person.bio ? `<div style="font-size: 12px; color: #999; margin-top: 5px;">${person.bio}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    const pagination = data.pagination;
+                    const paginationHtml = `
+                        <div class="pagination">
+                            <button class="pagination-btn" onclick="showDiscoverList(${pagination.current_page - 1})" ${pagination.current_page === 1 ? 'disabled' : ''}>
+                                ← Previous
+                            </button>
+                            <div class="pagination-info">
+                                Page ${pagination.current_page} of ${pagination.last_page}
+                            </div>
+                            <button class="pagination-btn" onclick="showDiscoverList(${pagination.current_page + 1})" ${!pagination.has_more ? 'disabled' : ''}>
+                                Next →
+                            </button>
+                        </div>
+                    `;
+                    
+                    content.innerHTML = peopleList + paginationHtml;
+                } else {
+                    content.innerHTML = `
+                        <div class="no-opponents">
+                            <div class="no-opponents-icon">🎉</div>
+                            <div>No more people to show</div>
+                            <div style="font-size: 14px; margin-top: 10px; color: #999;">Check back later for more recommendations!</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading people:', error);
+                content.innerHTML = `
+                    <div class="no-opponents">
+                        <div class="no-opponents-icon">❌</div>
+                        <div>Failed to load people</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Show liked opponents modal
+        async function showLikedOpponents() {
+            const modal = document.getElementById('likedOpponentsModal');
+            const content = document.getElementById('opponentsContent');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            modalTitle.textContent = '💖 Liked Opponents';
+            modal.classList.add('show');
+            
+            // Reset content
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading...</div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/people/liked?user_id=${USER_ID}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    content.innerHTML = data.data.map(opponent => `
+                        <div class="opponent-card">
+                            <img src="${opponent.pictures[0]}" 
+                                 alt="${opponent.name}" 
+                                 class="opponent-avatar" 
+                                 onerror="this.src='https://via.placeholder.com/70?text=${opponent.name.charAt(0)}'">
+                            <div class="opponent-info">
+                                <div class="opponent-name">${opponent.name}, ${opponent.age}</div>
+                                <div class="opponent-details">📍 ${opponent.location}</div>
+                                ${opponent.is_match ? '<span class="match-badge">✨ Match!</span>' : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    content.innerHTML = `
+                        <div class="no-opponents">
+                            <div class="no-opponents-icon">💔</div>
+                            <div>You haven't liked anyone yet</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading liked opponents:', error);
+                content.innerHTML = `
+                    <div class="no-opponents">
+                        <div class="no-opponents-icon">❌</div>
+                        <div>Failed to load liked opponents</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Close liked opponents modal
+        function closeLikedOpponents() {
+            const modal = document.getElementById('likedOpponentsModal');
+            modal.classList.remove('show');
+        }
+        
+        // Switch navigation tabs
+        function switchTab(tab) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            const navId = tab === 'match' ? 'navMatch' : 'nav' + tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById(navId).classList.add('active');
+            
+            // Handle tab actions
+            switch(tab) {
+                case 'discover':
+                    showDiscoverList();
+                    break;
+                case 'liked':
+                    showLikedOpponents();
+                    break;
+                case 'matches':
+                    showMatches();
+                    break;
+                case 'match':
+                    showMatchesList();
+                    break;
+                case 'profile':
+                    showProfile();
+                    break;
+            }
+        }
+        
+        // Show profile/stats
+        function showProfile() {
+            const modal = document.getElementById('likedOpponentsModal');
+            const content = document.getElementById('opponentsContent');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            modalTitle.textContent = '👤 Your Profile';
+            modal.classList.add('show');
+            
+            content.innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <div style="font-size: 80px; margin-bottom: 20px;">👤</div>
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 30px;">Your Stats</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 15px;">
+                            <div style="font-size: 32px; font-weight: bold; color: #4ECDC4;">${stats.likes}</div>
+                            <div style="font-size: 14px; color: #888;">Total Likes</div>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 15px;">
+                            <div style="font-size: 32px; font-weight: bold; color: #FF6B6B;">${stats.dislikes}</div>
+                            <div style="font-size: 14px; color: #888;">Total Passes</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #FE5066, #FF6B95); padding: 20px; border-radius: 15px; color: white; margin-bottom: 20px;">
+                        <div style="font-size: 32px; font-weight: bold;">${people.length}</div>
+                        <div style="font-size: 14px;">People Remaining</div>
+                    </div>
+                    
+                    <div style="font-size: 14px; color: #999; margin-top: 30px;">
+                        User ID: ${USER_ID}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Show matches list (mutual likes)
+        async function showMatchesList() {
+            const modal = document.getElementById('likedOpponentsModal');
+            const content = document.getElementById('opponentsContent');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            modalTitle.textContent = '✨ Your Matches';
+            modal.classList.add('show');
+            
+            // Reset content
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading matches...</div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/people/matches?user_id=${USER_ID}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    content.innerHTML = data.data.map(match => `
+                        <div class="opponent-card">
+                            <img src="${match.pictures[0]}" 
+                                 alt="${match.name}" 
+                                 class="opponent-avatar" 
+                                 onerror="this.src='https://via.placeholder.com/70?text=${match.name.charAt(0)}'">
+                            <div class="opponent-info">
+                                <div class="opponent-name">${match.name}, ${match.age}</div>
+                                <div class="opponent-details">📍 ${match.location}</div>
+                                <span class="match-badge">💖 It's a Match!</span>
+                                <div class="match-actions">
+                                    <button class="match-action-btn profile" onclick='viewProfile(${JSON.stringify(match)})'>
+                                        <span>👤</span> View Profile
+                                    </button>
+                                    <button class="match-action-btn message" onclick="sendMessage(${match.id}, '${match.name}')">
+                                        <span>💬</span> Message
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    content.innerHTML = `
+                        <div class="no-opponents">
+                            <div class="no-opponents-icon">💔</div>
+                            <div>No matches yet</div>
+                            <div style="font-size: 14px; margin-top: 10px; color: #999;">Keep swiping to find your match!</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading matches:', error);
+                content.innerHTML = `
+                    <div class="no-opponents">
+                        <div class="no-opponents-icon">❌</div>
+                        <div>Failed to load matches</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Show disliked people modal
+        async function showMatches() {
+            const modal = document.getElementById('likedOpponentsModal');
+            const content = document.getElementById('opponentsContent');
+            const modalTitle = modal.querySelector('.modal-title');
+            
+            modalTitle.textContent = '❌ Disliked People';
+            modal.classList.add('show');
+            
+            // Reset content
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Loading disliked people...</div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/people/disliked?user_id=${USER_ID}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    content.innerHTML = data.data.map(match => `
+                        <div class="opponent-card">
+                            <img src="${match.pictures[0]}" 
+                                 alt="${match.name}" 
+                                 class="opponent-avatar" 
+                                 onerror="this.src='https://via.placeholder.com/70?text=${match.name.charAt(0)}'">
+                            <div class="opponent-info">
+                                <div class="opponent-name">${match.name}, ${match.age}</div>
+                                <div class="opponent-details">📍 ${match.location}</div>
+                                <span class="match-badge" style="background: #FF6B6B;">❌ Passed</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    content.innerHTML = `
+                        <div class="no-opponents">
+                            <div class="no-opponents-icon">👍</div>
+                            <div>You haven't disliked anyone yet</div>
+                            <div style="font-size: 14px; margin-top: 10px; color: #999;">Keep swiping to find people you like!</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading matches:', error);
+                content.innerHTML = `
+                    <div class="no-opponents">
+                        <div class="no-opponents-icon">❌</div>
+                        <div>Failed to load matches</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // View profile function
+        function viewProfile(person) {
+            const modal = document.getElementById('profileModal');
+            const content = document.getElementById('profileContent');
+            
+            modal.classList.add('show');
+            
+            // Display profile directly from passed data
+            content.innerHTML = `
+                <div class="profile-detail">
+                    <img src="${person.pictures[0]}" 
+                         alt="${person.name}" 
+                         class="profile-image-large"
+                         onerror="this.src='https://via.placeholder.com/400x500?text=${person.name}'">
+                    <div class="profile-header">
+                        <div class="profile-name-large">${person.name}, ${person.age}</div>
+                        <div class="profile-location-large">
+                            <span>📍</span> ${person.location}
+                        </div>
+                    </div>
+                    ${person.bio ? `
+                        <div class="profile-bio-large">
+                            <div class="profile-bio-title">About</div>
+                            <div class="profile-bio-text">${person.bio}</div>
+                        </div>
+                    ` : ''}
+                    <div class="profile-actions">
+                        <button class="profile-action-btn message" onclick="sendMessage(${person.id}, '${person.name}')">
+                            <span>💬</span> Send Message
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Close profile modal
+        function closeProfile() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('show');
+        }
+        
+        // Send message function
+        let currentChatPerson = null;
+        
+        function sendMessage(personId, personName) {
+            currentChatPerson = { id: personId, name: personName };
+            
+            const modal = document.getElementById('chatModal');
+            const modalTitle = document.getElementById('chatPersonName');
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            modalTitle.textContent = `💬 Chat with ${personName}`;
+            modal.classList.add('show');
+            
+            // Initialize with welcome message
+            messagesContainer.innerHTML = `
+                <div class="chat-message received">
+                    <div class="message-text">Hey! 👋 Thanks for matching with me!</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            `;
+            
+            // Focus on input
+            setTimeout(() => {
+                document.getElementById('chatInput').focus();
+            }, 300);
+        }
+        
+        // Close chat modal
+        function closeChat() {
+            const modal = document.getElementById('chatModal');
+            modal.classList.remove('show');
+            currentChatPerson = null;
+        }
+        
+        // Send chat message
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            // Add sent message
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message sent';
+            messageElement.innerHTML = `
+                <div class="message-text">${message}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            
+            // Clear input
+            input.value = '';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Simulate response after 1 second (for demo)
+            setTimeout(() => {
+                const responses = [
+                    "That's interesting! 😊",
+                    "I'd love to know more about that!",
+                    "Haha, that's funny! 😄",
+                    "Tell me more!",
+                    "I totally agree! 👍",
+                    "That sounds amazing!"
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                const responseElement = document.createElement('div');
+                responseElement.className = 'chat-message received';
+                responseElement.innerHTML = `
+                    <div class="message-text">${randomResponse}</div>
+                    <div class="message-time">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+                `;
+                
+                messagesContainer.appendChild(responseElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+        }
+        
+        // Handle enter key in chat input
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('likedOpponentsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLikedOpponents();
+            }
+        });
+        
+        document.getElementById('profileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProfile();
+            }
+        });
+        
+        document.getElementById('chatModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeChat();
+            }
+        });
+        
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Refresh people
+        async function refreshPeople() {
+            showToast('🔄 Refreshing...');
+            
+            // Reset state
+            people = [];
+            currentIndex = 0;
+            
+            await fetchPeople();
+            
+            showToast('✨ Refreshed!');
+        }
+        
+        // Pull to refresh functionality
+        let startY = 0;
+        let currentY = 0;
+        let isPulling = false;
+        const pullThreshold = 100;
+        
+        const container = document.querySelector('.container');
+        const pullIndicator = document.getElementById('pullRefreshIndicator');
+        
+        container.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                startY = e.touches[0].clientY;
+                isPulling = true;
+            }
+        });
+        
+        container.addEventListener('touchmove', (e) => {
+            if (!isPulling) return;
+            
+            currentY = e.touches[0].clientY;
+            const pullDistance = currentY - startY;
+            
+            if (pullDistance > 0 && pullDistance < pullThreshold * 2) {
+                pullIndicator.style.transform = `translateX(-50%) translateY(${Math.min(pullDistance - 80, 20)}px)`;
+                
+                if (pullDistance > pullThreshold) {
+                    pullIndicator.classList.add('visible');
+                }
+            }
+        });
+        
+        container.addEventListener('touchend', async (e) => {
+            if (!isPulling) return;
+            
+            const pullDistance = currentY - startY;
+            
+            if (pullDistance > pullThreshold) {
+                pullIndicator.classList.add('spinning');
+                await refreshPeople();
+                pullIndicator.classList.remove('spinning');
+            }
+            
+            pullIndicator.classList.remove('visible');
+            pullIndicator.style.transform = 'translateX(-50%) translateY(-80px)';
+            isPulling = false;
+            startY = 0;
+            currentY = 0;
+        });
+        
+        // Initialize
+        fetchPeople();
+    </script>
+</body>
+</html>
