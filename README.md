@@ -331,9 +331,17 @@ The project includes a seeder with 15 sample profiles. To add more data, edit `d
 MIT License - feel free to use this project for learning or commercial purposes.
 
 ## 👨‍💻 Author
-
+Khairul Adha
+email: r4dioz.88@gmail.com
 Created as a demonstration of full-stack development with Laravel and React Native.
 
----
+RDB Schema / Database Design : https://github.com/r4diorusak/PHP-Tinder-app-20250929/blob/main/DATABASE_SCHEMA.md 
+
+Live Demo (Welcome Page) : https://tinderphp20250929.rainbowcodec.com/
+
+Live Demo (Mobile/React Native Simulation) : https://tinderphp20250929.rainbowcodec.com/mobile-demo.html
+
+API Documentation (Swagger) : https://tinderphp20250929.rainbowcodec.com/api/documentation   
+
 
 **Happy Swiping! ❤️**
